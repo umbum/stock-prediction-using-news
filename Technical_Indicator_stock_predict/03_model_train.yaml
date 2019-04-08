@@ -1,0 +1,19 @@
+﻿batch_size: 100                                          # 1개의 배치 학습에 포함할 발성 수 명시
+optimizer: Adam                                         # 사용할 optimizer 명시
+opt_decay: 0.0001
+amsgrad: 1
+lr: 0.001                                               # 사용할 learning rate 명시
+epoch: 500                                              # 학습 epoch 수 명시
+save_dir: E:/source/stock_predict/networks/              # 모델 저장 경로
+name: sk_predict_model004                               # 모델 저장하는 폴더 명
+loss_function: mse
+
+#DNN 모델 관련 파라미터들
+#get_model 함수 호출 시 딕셔너리 형태의 argument로 전달
+
+model:
+  initializer: he_normal                                # 은닉층 초기화 방식 명시
+  recurrent_activation: hard_sigmoid
+  activation: tanh
+  gru_units: 50
+  dr: 0.2                                               # 은닉층에 적용할 dropout 비율
