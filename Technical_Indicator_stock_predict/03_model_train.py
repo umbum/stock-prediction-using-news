@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #-*- coding: cp949 -*-
 #-*- coding: utf-8 -*- 
 
@@ -100,7 +101,7 @@ if __name__ == '__main__':
 
 	model, m_name = get_model(argDic = parser['model'])
 
-	save_dir = parser['save_dir'] + parser['name'] + '/'
+	save_dir = os.path.split(_abspath)[0]+'/'+ parser['name'] + '/'
 
 	#실험 결과 저장 폴더(들) 생성
 	if not os.path.exists(save_dir):

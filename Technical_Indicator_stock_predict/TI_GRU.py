@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #-*- coding: cp949 -*-
 #-*- coding: utf-8 -*- 
 
