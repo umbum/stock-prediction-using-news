@@ -26,6 +26,7 @@
 
 	Get wheel file and move to working directory.
 
+	If your python version is 3.6,
 	$pip install TA_Lib-0.4.17-cp36-cp36m-win32.whl
 
 

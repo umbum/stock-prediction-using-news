@@ -1,0 +1,20 @@
+data_day: 2   # ntn batch size. and also, data in a day
+
+ntn_output: 64     # must be multiple of 2
+ntn_input: 64
+ntn_epoch: 1
+ntn_mod_name: 'ntn.h5'
+
+cnn_output: 64
+cnn_input: 64
+cnn_window: 3
+cnn_bs: 32
+cnn_epoch: 1
+cnn_mod_name: 'cnn.h5'
+
+long_term: 30
+mid_term: 7
+short_term: 1
+
+u_vector_path: 'json_u_vec.json'
+bin_class_path: 'json_bin_class.json'

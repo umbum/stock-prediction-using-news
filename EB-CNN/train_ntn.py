@@ -3,6 +3,7 @@ from __future__ import print_function
 import random
 import sys
 import math
+import yaml
 import numpy as np
 import scipy.stats as stats
 
@@ -10,15 +11,19 @@ from sklearn.datasets import load_digits
 from keras import backend as K
 from keras.engine.topology import Layer
 from keras.optimizers import SGD
-from keras.layers import Dense
-from keras.layers import subtract
-from keras.layers import add
-from keras.layers import Input
+from keras.layers import subtract, add, Input
 from keras.models import Model, load_model
-from keras.utils import CustomObjectScope
+
+with open('EB-CNN.yaml', 'r', encoding='UTF8') as f_yaml:
+  parser = yaml.load(f_yaml)
+
+inp = parser['ntn_input']
+oup = parser['ntn_output']
+bs = parser['data_day']
 
 class NeuralTensorLayer(Layer):
-  def __init__(self, output_dim, input_dim=None, **kwargs):
+
+  def __init__(self, output_dim=oup, input_dim=inp, **kwargs):
     self.output_dim = output_dim #k
     self.input_dim = input_dim   #d
     if self.input_dim:
@@ -27,7 +32,7 @@ class NeuralTensorLayer(Layer):
 
 
   def build(self, input_shape):
-    print("output shape: ",self.compute_output_shape(input_shape))
+    #print("output shape: ",self.compute_output_shape(input_shape))
     mean = 0.0
     std = 1.0
     # T : k*d*d
@@ -56,16 +61,14 @@ class NeuralTensorLayer(Layer):
     e2 = inputs[2]
     er = inputs[3]
     batch_size = K.shape(e1)[0]
-    d = self.input_dim
-    k = self.output_dim
-    bs = np.int(K.get_value(batch_size))
-    print(bs," = bs")
-
-    u = ntn( K.reshape(ntn(e1, p, self.W, self.T1, self.b, d, k , batch_size),(bs,d)),
-             K.reshape(ntn(p, e2, self.W, self.T2, self.b , d, k , batch_size),(bs,d)), self.W, self.T3, self.b , d, k , batch_size)
-    ur = ntn(K.reshape(ntn(er, p, self.W, self.T1, self.b, d, k, batch_size),(bs,d)),
-            K.reshape(ntn(p, e2, self.W, self.T2, self.b, d, k, batch_size),(bs,d)), self.W, self.T3, self.b, d, k, batch_size)
-    result = K.concatenate([K.reshape(u,(1,d,bs)) ,K.reshape(ur,(1,d,bs))],axis =0)
+    self.bs = np.int(K.get_value(batch_size))
+    #print(self.bs," = bs")
+    d =self.input_dim
+    u = self.ntn( K.reshape(self.ntn(e1, p, self.T1),(self.bs,d)),
+             K.reshape(self.ntn(p, e2,self.T2),(self.bs,d)), self.T3)
+    ur = self.ntn(K.reshape(self.ntn(er, p, self.T1),(self.bs,d)),
+            K.reshape(self.ntn(p, e2,self.T2),(self.bs,d)),self.T3)
+    result = K.concatenate([K.reshape(K.transpose(u),(self.bs,d,1)) ,K.reshape(K.transpose(ur),(self.bs,d,1))],axis =2)
     #print(result,":result")
     return result
 
@@ -73,77 +76,72 @@ class NeuralTensorLayer(Layer):
   def compute_output_shape(self, input_shape):
     # print (input_shape)
     batch_size = input_shape[0][0]
-    return (batch_size, self.output_dim)
-
-  def get_config(self):
-    config = {
-      'output_dim': self.output_dim,
-      'input_dim': self.input_dim
-    }
-    base_config = super(NeuralTensorLayer, self).get_config()
-    return dict(list(base_config.items()) + list(config.items()))
-
-def ntn(e1, e2, W, T, b , d, k , batch_size ):
-  bs = np.int(K.get_value(batch_size))
-  #'?' is batch size
-  #print(e1,":e1") #(?,d)
-  #print(W, ":W")  #(k, 2*d)
-  #print(K.reshape(K.concatenate([e1, e2]),(2*d,1)), ":e1+e2") #(2*d, ?)
-
-  feed_forward_product = K.dot(W, K.reshape(K.concatenate([e1, e2]),(2*d,bs)))  # (k,?)
-  #print(feed_forward_product, ":ffp")
+    return (batch_size, self.output_dim, 2)
 
 
-  #print(K.dot( K.reshape(e1[0],(1,64)), T[0]),":K.dot( K.reshape(e1[0],(1,64)), T[0])") #(1,64)
-  #print( K.transpose(e2[0]) , ": K.transpose(e2[0])") #(64, )
-  bilinear_tensor_products = K.dot(K.dot( K.reshape(e1[0],(1,64)), T[0]), K.reshape(K.transpose(e2[0]),(64,1)))
-  #print(bilinear_tensor_products, "!!")  #(1,1)
+  def ntn(self,e1, e2, T):
+    k = self.output_dim
+    d = self.input_dim
+    #'?' is batch size
+    #print(e1,":e1") #(?,d)
+    #print(self.W, ":W")  #(k, 2*d)
+    #print(K.reshape(K.concatenate([e1, e2]),(2*d,1)), ":e1+e2") #(2*d, ?)
+
+    feed_forward_product = K.dot(self.W, K.reshape(K.concatenate([e1, e2]),(2*d,self.bs)))  # (k,?)
+    #print(feed_forward_product, ":ffp")
 
 
-  # iterate 'bs' times for batch processing
-  for j in range(bs)[1:]:
-    btp = K.dot(K.dot( K.reshape(e1[j],(1,64)), T[0]), K.reshape(K.transpose(e2[j]),(64,1)))
-    bilinear_tensor_products = K.concatenate([bilinear_tensor_products, btp])
-    #print(bilinear_tensor_products, "??")
+    #print(K.dot( K.reshape(e1[0],(1,64)), T[0]),":K.dot( K.reshape(e1[0],(1,64)), T[0])") #(1,64)
+    #print( K.transpose(e2[0]) , ": K.transpose(e2[0])") #(64, )
+    bilinear_tensor_products = K.dot(K.dot( K.reshape(e1[0],(1,64)), T[0]), K.reshape(K.transpose(e2[0]),(64,1)))
+    #print(bilinear_tensor_products, "!!")  #(1,1)
 
-  #interate for 'K' size
-  for i in range(k)[1:]:
-    btpt =  K.dot(K.dot( K.reshape(e1[0],(1,64)), T[i]), K.reshape(K.transpose(e2[0]),(64,1)))
-    for j in range(bs)[1:]:
-      btp =  K.dot(K.dot( K.reshape(e1[j],(1,64)), T[i]), K.reshape(K.transpose(e2[j]),(64,1)))
-      btpt = K.concatenate([btpt, btp])
-    #print(btpt, "??")
 
-    bilinear_tensor_products = K.concatenate([bilinear_tensor_products, btpt], axis=0)
-  #print(bilinear_tensor_products, ":final btp")  # (?,k)
+    # iterate 'bs' times for batch processing
+    for j in range(self.bs)[1:]:
+      btp = K.dot(K.dot( K.reshape(e1[j],(1,64)), T[0]), K.reshape(K.transpose(e2[j]),(64,1)))
+      bilinear_tensor_products = K.concatenate([bilinear_tensor_products, btp])
+      #print(bilinear_tensor_products, "??")
 
-  #print(add([bilinear_tensor_products, feed_forward_product]),":add([bilinear_tensor_products, feed_forward_product])")
-  #print(K.tf.broadcast_to(b, [k, bs]),":K.tf.broadcast_to(b, [k, bs])")
-  r = K.tanh(
-    add([add([bilinear_tensor_products, feed_forward_product]), K.tf.broadcast_to(b, [k, bs])]))
-  #print(r, ":r")
+    #interate for 'K' size
+    for i in range(k)[1:]:
+      btpt =  K.dot(K.dot( K.reshape(e1[0],(1,64)), T[i]), K.reshape(K.transpose(e2[0]),(64,1)))
+      for j in range(self.bs)[1:]:
+        btp =  K.dot(K.dot( K.reshape(e1[j],(1,64)), T[i]), K.reshape(K.transpose(e2[j]),(64,1)))
+        btpt = K.concatenate([btpt, btp])
+      #print(btpt, "??")
 
-  return r
+      bilinear_tensor_products = K.concatenate([bilinear_tensor_products, btpt], axis=0)
+    #print(bilinear_tensor_products, ":final btp")  # (?,k)
+
+    #print(add([bilinear_tensor_products, feed_forward_product]),":add([bilinear_tensor_products, feed_forward_product])")
+    #print(K.tf.broadcast_to(self.b, [k, self.bs]),":K.tf.broadcast_to(self.b, [k, self.bs])")
+    r = K.tanh(
+      add([add([bilinear_tensor_products, feed_forward_product]), K.tf.broadcast_to(self.b, [k, self.bs])]))
+    #print(r, ":r")
+
+    return r
 
 # variation of socher's contrastive max-margin objective function = xiao ding paper loss
-def custom_loss(varis,oup,bs):
+def custom_loss(oup,bs):
   def contrastive_loss(y_true, y_pre):
     y_pre = K.print_tensor(y_pre, message="Value of u,ur")
-
-    #print(y_pre[1, :],":y_pre[1, :]")
-    temp1 = K.tf.maximum(subtract([y_pre[1, :, 0], y_pre[0, :, 0]]) + 1, 0)
+    #print(y_pre,":y_pre")
+    #print(y_pre[0,:,1],":y_pre[0,:,1]")
+    temp1 = K.tf.maximum(subtract([y_pre[0,:,1], y_pre[0,:,0]]) + 1, 0)
     temp1 = K.print_tensor(temp1, message="temp1:1th batch")
     temp1 = K.tf.reduce_sum(temp1)
     temp1 = K.print_tensor(temp1, message="temp1:1th batch")
     for i in range(1,bs):
-      temp1s = K.tf.maximum(subtract([y_pre[1,:,i],y_pre[0,:,i]]) + 1, 0)
+      temp1s = K.tf.maximum(subtract([y_pre[i,:,1],y_pre[i,:,0]]) + 1, 0)
       temp1s = K.print_tensor(temp1s, message="temp1:%dth batch"%(i+1))
       temp1s = K.tf.reduce_sum(temp1s)
       temp1 = K.concatenate([K.reshape(temp1,(1,i)), K.reshape(temp1s,(1,1))])
       temp1 = K.print_tensor(temp1, message="temp1:after calc %dth batch" % (i+1))
-
+    varis =[]
+    [varis.append(var) for var in  K.tf.trainable_variables()]
     for i in range(0, 5):
-      #print(varis[i])
+      #print(varis[i],"varis[%i]"%(i))
       varis[i] = K.print_tensor(varis[i], message="Value of varis%d"%(i))
     temp2 = []
     for i in range(0,5):
@@ -156,26 +154,23 @@ def custom_loss(varis,oup,bs):
     temp = temp1 + (([0.000001]) * temp2)
     temp = K.print_tensor(temp, message="Value of temp1+temp2*0.000001")
 
-
-
     return temp
   return contrastive_loss
+
 
 def get_data(bs):
   digits = load_digits()
   L = int(math.floor(digits.data.shape[0] * 0.15))
-  L = L - divmod(L,4*bs)[1]
+  L = L - divmod(L,bs)[1]
+  E = digits.data.shape[0] - L
+  E = E - divmod(E,bs)[1]
   X_train = digits.data[:L]
   y_train = digits.target[:L]
-  X_test = digits.data[L + 1:]
-  y_test = digits.target[L + 1:]
+  X_test = digits.data[L:E]
+  y_test = digits.target[L:E]
   return X_train, y_train, X_test, y_test
 
 def main():
-
-  inp = 64
-  oup = 64 # must be multiple of 2
-  bs = 1
 
   input1 = Input(shape=(inp,), batch_shape=(bs,inp) ,dtype='float32')
   input2 = Input(shape=(inp,), batch_shape=(bs,inp) ,dtype='float32')
@@ -184,10 +179,10 @@ def main():
   btp= NeuralTensorLayer(output_dim=oup, input_dim=inp)([input1, input2, input3, input4])
 
 
-  model = Model(input=[input1, input2, input3, input4], output=[btp])
+  model = Model(inputs=[input1, input2, input3, input4], outputs=[btp])
 
   sgd = SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
-  model.compile(loss=custom_loss(model.trainable_weights,oup,bs), optimizer=sgd)
+  model.compile(loss=custom_loss(oup,bs), optimizer=sgd)
   X_train, Y_train, X_test, Y_test = get_data(bs)
   X_train = X_train.astype(np.float32)
   Y_train = Y_train.astype(np.float32)
@@ -195,14 +190,15 @@ def main():
   Y_test = Y_test.astype(np.float32)
 
 
+
   model.fit([X_train*(random.getrandbits(2)/1000), X_train*(random.getrandbits(2)/1000),
-             X_train*(random.getrandbits(2)/1000), X_train*(random.getrandbits(2)/1000)],Y_train , epochs=1, batch_size=bs)
+             X_train*(random.getrandbits(2)/1000), X_train*(random.getrandbits(2)/1000)],Y_train , epochs=parser['ntn_epoch'], batch_size=bs)
   score = model.evaluate([X_test*(random.getrandbits(2)/1000), X_test*(random.getrandbits(2)/1000),
                           X_test*(random.getrandbits(2)/1000), X_test*(random.getrandbits(2)/1000)], Y_test, batch_size=bs)
   print(score)
 
-  model.save("ntn.h5")
-  print("Save model: 'ntn.h5'")
+  model.save(parser['ntn_mod_name'])
+  print("Save model: %s"%(parser['ntn_mod_name']))
 
 
 if __name__ == "__main__" :
