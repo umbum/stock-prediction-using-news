@@ -1,3 +1,10 @@
+# external open sources
+google_translation/
+stanford-corenlp-*/
+
+# data file
+*.csv
+
 # IDE / Editor metadata file
 .idea/
 .vscode/
