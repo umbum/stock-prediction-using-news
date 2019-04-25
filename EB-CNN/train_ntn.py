@@ -64,10 +64,10 @@ class NeuralTensorLayer(Layer):
     self.bs = np.int(K.get_value(batch_size))
     #print(self.bs," = bs")
     d =self.input_dim
-    u = self.ntn( K.reshape(self.ntn(e1, p, self.T1),(self.bs,d)),
-             K.reshape(self.ntn(p, e2,self.T2),(self.bs,d)), self.T3)
-    ur = self.ntn(K.reshape(self.ntn(er, p, self.T1),(self.bs,d)),
-            K.reshape(self.ntn(p, e2,self.T2),(self.bs,d)),self.T3)
+    u = self.ntn( K.transpose(self.ntn(e1, p, self.T1)),
+             K.transpose(self.ntn(p, e2,self.T2)), self.T3)
+    ur = self.ntn(K.transpose(self.ntn(er, p, self.T1)),
+            K.transpose(self.ntn(p, e2,self.T2)),self.T3)
     result = K.concatenate([K.reshape(K.transpose(u),(self.bs,d,1)) ,K.reshape(K.transpose(ur),(self.bs,d,1))],axis =2)
     #print(result,":result")
     return result
@@ -85,9 +85,9 @@ class NeuralTensorLayer(Layer):
     #'?' is batch size
     #print(e1,":e1") #(?,d)
     #print(self.W, ":W")  #(k, 2*d)
-    #print(K.reshape(K.concatenate([e1, e2]),(2*d,1)), ":e1+e2") #(2*d, ?)
+    #print(K.transpose(K.concatenate([e1, e2])), ":e1+e2") #(2*d, ?)
 
-    feed_forward_product = K.dot(self.W, K.reshape(K.concatenate([e1, e2]),(2*d,self.bs)))  # (k,?)
+    feed_forward_product = K.dot(self.W, K.transpose(K.concatenate([e1, e2])))  # (k,?)
     #print(feed_forward_product, ":ffp")
 
 
@@ -112,7 +112,7 @@ class NeuralTensorLayer(Layer):
       #print(btpt, "??")
 
       bilinear_tensor_products = K.concatenate([bilinear_tensor_products, btpt], axis=0)
-    #print(bilinear_tensor_products, ":final btp")  # (?,k)
+    #print(bilinear_tensor_products, ":final btp")  # (k,?)
 
     #print(add([bilinear_tensor_products, feed_forward_product]),":add([bilinear_tensor_products, feed_forward_product])")
     #print(K.tf.broadcast_to(self.b, [k, self.bs]),":K.tf.broadcast_to(self.b, [k, self.bs])")

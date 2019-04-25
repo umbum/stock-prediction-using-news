@@ -63,7 +63,7 @@ class ConvolutionalNN(Layer):
     #print(ust, ":ust")
 
 
-    ult = K.reshape(ult,(self.bs, ul, dd,d))
+    #ult = K.reshape(ult,(self.bs, ul, dd,d))
     ulong = []
     for i in range(dd):
       ulong.append(ult[:,:,i, :])
@@ -83,7 +83,7 @@ class ConvolutionalNN(Layer):
       vl_vec = K.concatenate([vl_vec, K.reshape(vl_vect, (self.bs, 1, 1,d))],axis=1)
     #print("vl_vec:", vl_vec)
 
-    umt = K.reshape(umt, (self.bs,um,dd, d))
+    #umt = K.reshape(umt, (self.bs,um,dd, d))
     umid = []
     for i in range(dd):
       umid.append(umt[:,:,i, :])
@@ -129,8 +129,8 @@ class ConvolutionalNN(Layer):
 def binary_classification_loss(y_true, y_pre):
   tp = K.binary_crossentropy(y_true, y_pre)
   tp = K.print_tensor(tp, message="Value of tp")
-  temp = K.mean(K.binary_crossentropy(y_true, y_pre),(0,1,2,3))
-  #temp = K.print_tensor(temp, message="Value of temp")
+  temp = K.mean(tp,(0,1,2,3))
+  temp = K.print_tensor(temp, message="Value of temp")
   return temp
 
 
