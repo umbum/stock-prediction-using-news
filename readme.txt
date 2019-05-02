@@ -30,7 +30,7 @@
 	$pip install TA_Lib-0.4.17-cp36-cp36m-win32.whl
 
 
-3. To get ´ë½ÅÁõ±Ç api a.k.a CYBOS, 
+3. To get ëŒ€ì‹ ì¦ê¶Œ api a.k.a CYBOS, 
 	*It only works on python 32bit.
 
 	Make your acount, at below link.
@@ -39,10 +39,10 @@
 	Or, if you not made regular member acount(ex. web acount), go to below link.
 	http://vt.daishin.com/ds/cybos/info/info.do 
 
-	and access menu 'È¸¿ø°¡ÀÔ ¹Ù·Î°¡±â' to create acount for simulated investment, 
-	and access '¸ğÀÇÅõÀÚ Âü°¡½ÅÃ»' to apply.
+	and access menu 'íšŒì›ê°€ì… ë°”ë¡œê°€ê¸°' to create acount for simulated investment, 
+	and access 'ëª¨ì˜íˆ¬ì ì°¸ê°€ì‹ ì²­' to apply.
 
 	Then, download CYBOS 5 from below link,
 	http://money2.daishin.com/E5/WTS/Customer/GuideTrading/DW_DownloadCenter.aspx?m=1101&p=2669&v=2248&gclid=Cj0KCQiAnOzSBRDGARIsAL-mUB2eT8Di250ZRZK-JSJ9W1DtiRc5Keg99_-WlWFFfAhCfv4BkU-81SQaAuESEALw_wcB
 
-	Log in with your acount, in menu CYBOS PLUS with '¸ğÀÇÅõÀÚ'(simulated investment) option.
+	Log in with your acount, in menu CYBOS PLUS with 'ëª¨ì˜íˆ¬ì'(simulated investment) option.

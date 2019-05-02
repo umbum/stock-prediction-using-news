@@ -2,9 +2,9 @@
 #-*- coding: cp949 -*-
 #-*- coding: utf-8 -*- 
 
-#	¸ÕÀú CybosPlus¿¡ Á¢¼ÓÇÑ´Ù.
-#	Æ¯Á¤ÇÑ ÁÖ°¡¿¡ ´ëÇØ	1996/12/26ÀÏºÎÅÍ ÇöÀç±îÁö ÁÖ°¡ Á¤º¸¸¦ ¹Ş¾Æ¿Â´Ù.
-#	ÁÖ°¡¿¡´ëÇØ ±â¼úÀû ÁöÇ¥¸¦ °è»êÇÏ°í ¿¢¼¿·Î ÀúÀåÇÑ´Ù.
+#	ë¨¼ì € CybosPlusì— ì ‘ì†í•œë‹¤.
+#	íŠ¹ì •í•œ ì£¼ê°€ì— ëŒ€í•´	1996/12/26ì¼ë¶€í„° í˜„ì¬ê¹Œì§€ ì£¼ê°€ ì •ë³´ë¥¼ ë°›ì•„ì˜¨ë‹¤.
+#	ì£¼ê°€ì—ëŒ€í•´ ê¸°ìˆ ì  ì§€í‘œë¥¼ ê³„ì‚°í•˜ê³  ì—‘ì…€ë¡œ ì €ì¥í•œë‹¤.
 #
 import sys
 from PyQt5.QtWidgets import *
@@ -22,27 +22,27 @@ class CpStockChart:
 	def __init__(self):
 		self.objStockChart = win32com.client.Dispatch("CpSysDib.StockChart")
  
-    # Â÷Æ® ¿äÃ» - ±â°£ ±âÁØÀ¸·Î
+    # ì°¨íŠ¸ ìš”ì²­ - ê¸°ê°„ ê¸°ì¤€ìœ¼ë¡œ
 	def RequestFromTo(self, code, fromDate, toDate, caller):
 		print(code, fromDate, toDate)
-		# ¿¬°á ¿©ºÎ Ã¼Å©
+		# ì—°ê²° ì—¬ë¶€ ì²´í¬
 		bConnect = g_objCpStatus.IsConnect
 		if (bConnect == 0):
-			print("PLUS°¡ Á¤»óÀûÀ¸·Î ¿¬°áµÇÁö ¾ÊÀ½. ")
+			print("PLUSê°€ ì •ìƒì ìœ¼ë¡œ ì—°ê²°ë˜ì§€ ì•ŠìŒ. ")
 			return False
  
-		self.objStockChart.SetInputValue(0, code)  # Á¾¸ñÄÚµå
-		self.objStockChart.SetInputValue(1, ord('1'))  # ±â°£À¸·Î ¹Ş±â
-		self.objStockChart.SetInputValue(2, toDate)  # To ³¯Â¥
-		self.objStockChart.SetInputValue(3, fromDate)  # From ³¯Â¥
-		self.objStockChart.SetInputValue(5, [0, 2, 3, 4, 5, 8])  # ³¯Â¥,½Ã°¡,°í°¡,Àú°¡,Á¾°¡,°Å·¡·®
-		self.objStockChart.SetInputValue(6, ord('D'))  # 'Â÷Æ® ÁÖ±â - ÀÏ°£ Â÷Æ® ¿äÃ»
-		self.objStockChart.SetInputValue(9, ord('1'))  # ¼öÁ¤ÁÖ°¡ »ç¿ë
+		self.objStockChart.SetInputValue(0, code)  # ì¢…ëª©ì½”ë“œ
+		self.objStockChart.SetInputValue(1, ord('1'))  # ê¸°ê°„ìœ¼ë¡œ ë°›ê¸°
+		self.objStockChart.SetInputValue(2, toDate)  # To ë‚ ì§œ
+		self.objStockChart.SetInputValue(3, fromDate)  # From ë‚ ì§œ
+		self.objStockChart.SetInputValue(5, [0, 2, 3, 4, 5, 8])  # ë‚ ì§œ,ì‹œê°€,ê³ ê°€,ì €ê°€,ì¢…ê°€,ê±°ë˜ëŸ‰
+		self.objStockChart.SetInputValue(6, ord('D'))  # 'ì°¨íŠ¸ ì£¼ê¸° - ì¼ê°„ ì°¨íŠ¸ ìš”ì²­
+		self.objStockChart.SetInputValue(9, ord('1'))  # ìˆ˜ì •ì£¼ê°€ ì‚¬ìš©
 		self.objStockChart.BlockRequest()
  
 		rqStatus = self.objStockChart.GetDibStatus()
 		rqRet = self.objStockChart.GetDibMsg1()
-		print("Åë½Å»óÅÂ", rqStatus, rqRet)
+		print("í†µì‹ ìƒíƒœ", rqStatus, rqRet)
 		if rqStatus != 0:
 			exit()
  
@@ -62,7 +62,7 @@ class MyWindow(QMainWindow):
 	def __init__(self):
 		super().__init__()
  
-        # ±âº» º¯¼öµé
+        # ê¸°ë³¸ ë³€ìˆ˜ë“¤
 		self.dates = []
 		self.opens = []
 		self.highs = []
@@ -82,7 +82,7 @@ class MyWindow(QMainWindow):
 		self.roc =[]
 		self.obv =[]
 		self.y_label=[]
-		# À©µµ¿ì ¹öÆ° ¹èÄ¡
+		# ìœˆë„ìš° ë²„íŠ¼ ë°°ì¹˜
 		self.setWindowTitle("PLUS API TEST")
 		nH = 20
  
@@ -90,26 +90,26 @@ class MyWindow(QMainWindow):
 		self.codeEdit.move(20, nH)
 		self.codeEdit.textChanged.connect(self.codeEditChanged)
 		self.codeEdit.setText('00660')
-		self.label = QLabel('Á¾¸ñÄÚµå', self)
+		self.label = QLabel('ì¢…ëª©ì½”ë“œ', self)
 		self.label.move(140, nH)
 		nH += 50
  
-		btchart1= QPushButton("±â°£(ÀÏ°£) ¿äÃ»", self)
+		btchart1= QPushButton("ê¸°ê°„(ì¼ê°„) ìš”ì²­", self)
 		btchart1.move(20, nH)
 		btchart1.clicked.connect(self.btchart1_clicked)
 		nH += 50
 
-		btchart1= QPushButton("ÁöÇ¥ °è»ê", self)
+		btchart1= QPushButton("ì§€í‘œ ê³„ì‚°", self)
 		btchart1.move(20, nH)
 		btchart1.clicked.connect(self.btchart2_clicked)
 		nH += 50
 
-		btchart7 = QPushButton("¿¢¼¿·Î ÀúÀå", self)
+		btchart7 = QPushButton("ì—‘ì…€ë¡œ ì €ì¥", self)
 		btchart7.move(20, nH)
 		btchart7.clicked.connect(self.btchart7_clicked)
 		nH += 50
  
-		btnExit = QPushButton("Á¾·á", self)
+		btnExit = QPushButton("ì¢…ë£Œ", self)
 		btnExit.move(20, nH)
 		btnExit.clicked.connect(self.btnExit_clicked)
 		nH += 50
@@ -117,7 +117,7 @@ class MyWindow(QMainWindow):
 		self.setGeometry(300, 300, 300, nH)
 		self.setCode('A000660')
  
-	# ±â°£(ÀÏ°£) À¸·Î ¹Ş±â
+	# ê¸°ê°„(ì¼ê°„) ìœ¼ë¡œ ë°›ê¸°
 	def btchart1_clicked(self):
 		if self.objChart.RequestFromTo(self.code, 19961226, 20051007, self) == False:
 			exit()
@@ -142,17 +142,17 @@ class MyWindow(QMainWindow):
 		self.rsi = talib.RSI(close)
 		self.obv = talib.OBV(close,vol)
 		self.upband, middle, self.lowband = talib.BBANDS(close)
-		print('ÁöÇ¥°è»ê ¿Ï·á')
+		print('ì§€í‘œê³„ì‚° ì™„ë£Œ')
 
 	def btchart7_clicked(self):
 		charfile = 'chart.xlsx'
         
-		chartData = {'ÀÏÀÚ' : self.dates,
-					'½Ã°¡' : self.opens,
-					'°í°¡' : self.highs,
-					'Àú°¡' : self.lows,
-					'Á¾°¡' : self.closes,
-					'°Å·¡·®' : self.vols,
+		chartData = {'ì¼ì' : self.dates,
+					'ì‹œê°€' : self.opens,
+					'ê³ ê°€' : self.highs,
+					'ì €ê°€' : self.lows,
+					'ì¢…ê°€' : self.closes,
+					'ê±°ë˜ëŸ‰' : self.vols,
 					'MACD' : self.macd,
 					'EMA' : self.ema,
 					'Momentum' : self.momentum,
@@ -165,12 +165,12 @@ class MyWindow(QMainWindow):
 					'OBV' : self.obv,
 					'upperband': self.upband,
 					'lowerband': self.lowband,
-					'Àü³¯´ëºñÁõ°¡·®' : self.y_label,
+					'ì „ë‚ ëŒ€ë¹„ì¦ê°€ëŸ‰' : self.y_label,
 					}
-		df =pd.DataFrame(chartData, columns=['ÀÏÀÚ','½Ã°¡','°í°¡','Àú°¡','Á¾°¡','°Å·¡·®','MACD','EMA','Momentum','slowK','slowD','ROC','william_R','A/D','RSI','OBV','upperband','lowerband','Àü³¯´ëºñÁõ°¡·®'])
+		df =pd.DataFrame(chartData, columns=['ì¼ì','ì‹œê°€','ê³ ê°€','ì €ê°€','ì¢…ê°€','ê±°ë˜ëŸ‰','MACD','EMA','Momentum','slowK','slowD','ROC','william_R','A/D','RSI','OBV','upperband','lowerband','ì „ë‚ ëŒ€ë¹„ì¦ê°€ëŸ‰'])
       
  
-		df = df.set_index('ÀÏÀÚ')
+		df = df.set_index('ì¼ì')
  
 		# create a Pandas Excel writer using XlsxWriter as the engine.
 		writer = pd.ExcelWriter(charfile, engine='xlsxwriter')
@@ -195,7 +195,7 @@ class MyWindow(QMainWindow):
  
 		name = g_objCodeMgr.CodeToName(code)
 		if len(name) == 0:
-			print("Á¾¸ñÄÚµå È®ÀÎ")
+			print("ì¢…ëª©ì½”ë“œ í™•ì¸")
 			return
  
 		self.label.setText(name)

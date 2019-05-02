@@ -13,7 +13,7 @@ r_value = 0.0001
 _abspath = os.path.abspath(__file__)
 m_name = _abspath.split('/')[-1].split('.')[0][-2:]
 def get_model(argDic):
-	inputs = Input(shape=(None,12))		#ÀÚ·áÀÇ ¼ö, ¼ø¼­¿­ÀÇ ±æÀÌ, x º¤ÅÍÀÇ Å©±â
+	inputs = Input(shape=(None,12))		#ìë£Œì˜ ìˆ˜, ìˆœì„œì—´ì˜ ê¸¸ì´, x ë²¡í„°ì˜ í¬ê¸°
 
 	l = GRU(argDic['gru_units'], activation='tanh', recurrent_activation='hard_sigmoid', use_bias=True, kernel_initializer='glorot_uniform', recurrent_initializer='orthogonal', bias_initializer='zeros', kernel_regularizer=regularizers.l2(r_value), recurrent_regularizer=None, bias_regularizer=None, activity_regularizer=None, kernel_constraint=None, recurrent_constraint=None, bias_constraint=None, dropout=0, recurrent_dropout=0, implementation=1, return_sequences=True, return_state=False, go_backwards=False, stateful=False, unroll=False, reset_after=False)(inputs)
 	l = Dropout(argDic['dr'])(l)

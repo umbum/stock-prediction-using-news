@@ -2,10 +2,10 @@
 #-*- coding: cp949 -*-
 #-*- coding: utf-8 -*- 
 
-#	ÀúÀåµÈ ¿¢¼¿À» ºÒ·¯¿Â´Ù.
-#	ÀÏÀÚ, ½Ã°¡, °í°¡, Àú°¡, Á¾°¡, °Å·¡·®Àº data·Î ÀúÀå
-#	MACD, EMA, Momentum, SlowK, SlowD, ROC, William_R, A/D, RSI, OBV, upperband, lowerband´Â ±â¼úÀû ÁöÇ¥·Î¼­ ÇĞ½À¿¡ »ç¿ëµÉ X_label·Î ÀúÀå
-#	Àü³¯´ëºñ Áõ°¡·®Àº y_label·Î ÀúÀå
+#	ì €ì¥ëœ ì—‘ì…€ì„ ë¶ˆëŸ¬ì˜¨ë‹¤.
+#	ì¼ì, ì‹œê°€, ê³ ê°€, ì €ê°€, ì¢…ê°€, ê±°ë˜ëŸ‰ì€ dataë¡œ ì €ì¥
+#	MACD, EMA, Momentum, SlowK, SlowD, ROC, William_R, A/D, RSI, OBV, upperband, lowerbandëŠ” ê¸°ìˆ ì  ì§€í‘œë¡œì„œ í•™ìŠµì— ì‚¬ìš©ë  X_labelë¡œ ì €ì¥
+#	ì „ë‚ ëŒ€ë¹„ ì¦ê°€ëŸ‰ì€ y_labelë¡œ ì €ì¥
 
 from openpyxl import load_workbook
 import numpy as np

@@ -68,7 +68,7 @@ def load_data(stock_name, time_step):
 	return (np.array(x_label), np.array(y_label),np.array(close[time_step:]))
 
 if __name__ == '__main__':
-	#yamlÆÄÀÏ ·Îµå
+	#yamlíŒŒì¼ ë¡œë“œ
 	_abspath = os.path.abspath(__file__)
 	dir_yaml = os.path.splitext(_abspath)[0] + '.yaml'
 	with open(dir_yaml, 'r', encoding='UTF8') as f_yaml:
@@ -103,11 +103,11 @@ if __name__ == '__main__':
 
 	save_dir = os.path.split(_abspath)[0]+'/'+ parser['name'] + '/'
 
-	#½ÇÇè °á°ú ÀúÀå Æú´õ(µé) »ı¼º
+	#ì‹¤í—˜ ê²°ê³¼ ì €ì¥ í´ë”(ë“¤) ìƒì„±
 	if not os.path.exists(save_dir):
 		os.makedirs(save_dir)
 
-	#ÇöÀç ½ÇÇè hyper-parameterµéÀ» ÅØ½ºÆ® ÆÄÀÏ¿¡ ÀúÀå
+	#í˜„ì¬ ì‹¤í—˜ hyper-parameterë“¤ì„ í…ìŠ¤íŠ¸ íŒŒì¼ì— ì €ì¥
 	f_params = open(save_dir + 'f_params.txt', 'w')
 	for k, v in parser.items():
 		f_params.write('{}:\t{}\n'.format(k, v))
@@ -120,7 +120,7 @@ if __name__ == '__main__':
 	with open(save_dir + 'summary.txt' ,'w+') as f_summary:
 		model.summary(print_fn=lambda x: f_summary.write(x + '\n'))
 
-	#¸ğµ¨ optimizer ¹× objective funciton Á¤ÀÇ
+	#ëª¨ë¸ optimizer ë° objective funciton ì •ì˜
 	if parser['optimizer'] == 'SGD':
 		optimizer = eval(parser['optimizer'])(lr=parser['lr'],  decay = parser['opt_decay'])
 	elif parser['optimizer'] == 'Adam':
@@ -131,7 +131,7 @@ if __name__ == '__main__':
 	#model.compile(loss='categorical_crossentropy',optimizer='adam')
 	model.compile(loss = parser['loss_function'],optimizer = optimizer,metrics = ['accuracy'])
 
-	f_eer = open(save_dir + 'eers.txt', 'w', buffering=1)	# epoch º° ¼º´É ±â·ÏÇÒ ÅØ½ºÆ® ¹®¼­ »ı¼º
+	f_eer = open(save_dir + 'eers.txt', 'w', buffering=1)	# epoch ë³„ ì„±ëŠ¥ ê¸°ë¡í•  í…ìŠ¤íŠ¸ ë¬¸ì„œ ìƒì„±
 
 	for epoch in range(parser['epoch']):
 		
