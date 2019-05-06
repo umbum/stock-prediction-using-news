@@ -1,3 +1,4 @@
+*.pickle
 # external open sources
 google_translation/
 stanford-corenlp-*/
