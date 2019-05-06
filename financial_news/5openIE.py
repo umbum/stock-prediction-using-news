@@ -20,7 +20,7 @@ from pprint import pprint
 import csv
 
 
-src = open("./4news_translated1-224.csv", 'r', newline='')
+src = open("./4news_translated2019.04.09-2018.01.01_sorted.csv", 'r', newline='')
 dst = open("./5news_IE.csv", 'w', newline='')
 
 src_reader = csv.reader(src, delimiter=",", quotechar="|")
@@ -54,8 +54,12 @@ for row in src_reader:
         extracted_str = openie.stdout.readline()[:-1]
         if po.search(extracted_str) is None:
             # Extracted
-            confidence, subject, relation, _object = extracted_str.split("\t")
-            dst_writer.writerow([row[0], row[1], confidence, subject, relation, _object])
+            try:
+                confidence, subject, relation, _object = extracted_str.split("\t")
+                dst_writer.writerow([row[0], row[1], confidence, subject, relation, _object])
+            except ValueError as e:
+                print(extracted_str.split("\t"))
+
         else:
             # Not extracted
             if extracted_str[-10:] == exit_str:
