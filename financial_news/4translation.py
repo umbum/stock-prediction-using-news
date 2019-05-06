@@ -1,39 +1,57 @@
-"""
-thread pool 구성해서 쭉 돌려야... 그냥 리퀘스트하면 너무 오래걸려.
-"""
 from pprint import pprint
 import csv
 import re
 from google.cloud import translate
 import html
+import threading
+import time
 
-# src = open("./3news_preprocessed.csv", 'r', newline='')
-# dst = open("./4news_translated.csv", 'w', newline='')
+start_date = "2017.12.31"
+end_date = "2017.01.01"
+src = open("./3news_preprocessed.csv", 'r', newline='')
+dst = open("./4news_translated{}-{}.csv".format(start_date, end_date), 'w', newline='')
 
-# src_reader = csv.reader(src, delimiter=",", quotechar="|")
-# dst_writer = csv.writer(dst, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)
+src_lock = threading.Lock()
+dst_lock = threading.Lock()
+
+src_reader = csv.reader(src, delimiter=",", quotechar="|")
+dst_writer = csv.writer(dst, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)
 
 translate_client = translate.Client()
 target = 'en'
 
-i = 0
-for row in src_reader:
-    i += 1
-    if i < 223:
-        continue
-    translation = translate_client.translate(row[2], target_language=target)
-    translated_text = html.unescape(translation['translatedText'])
+class TranslateWorker(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+    
+    def run(self):
+        while True:
+            # time.sleep(3)
+            with src_lock:
+                try:
+                    day, _time, statement = next(src_reader)
+                    if day > start_date:
+                        continue
+                    elif day < end_date:
+                        raise StopIteration
+                    # print(u'Text: {}'.format(statement))
+                except StopIteration:
+                    break
 
-    # print(u'Text: {}'.format(row[2]))
-    print(u'[{}] Translation: {}'.format(i, translated_text))
-    with lock:
-        dst_writer.writerow([row[0], row[1], translated_text])  
+            translation = translate_client.translate(statement, target_language=target)
+            translated_text = html.unescape(translation['translatedText'])
+            # print(u'[] Translation: {}'.format(translated_text))
+            with dst_lock:
+                dst_writer.writerow([day, _time, translated_text])
+        
 
 
+workers = [TranslateWorker() for i in range(50)]
+for w in workers:
+    w.start()
 
-with ThreadPoolExecutor(max_workers=20) as e:
-    for i in range(1, 1):
-        e.submit(requestAndWrite, i)
+for w in workers:
+    w.join()
 
 src.close()
 dst.close()
