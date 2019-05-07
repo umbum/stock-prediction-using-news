@@ -20,8 +20,8 @@ from pprint import pprint
 import csv
 
 
-src = open("./4news_translated2019.04.09-2018.01.01_sorted.csv", 'r', newline='')
-dst = open("./5news_IE.csv", 'w', newline='')
+src = open("./4news_translated2019.04.09-2018.01.01_sorted.csv", 'r', newline='', encoding="utf-8",)
+dst = open("./5news_IE.csv", 'w', newline='', encoding="utf-8") 
 
 src_reader = csv.reader(src, delimiter=",", quotechar="|")
 dst_writer = csv.writer(dst, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)

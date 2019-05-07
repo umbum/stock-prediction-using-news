@@ -25,7 +25,7 @@ from natsort import natsorted
 fnames = os.listdir("../htmls")
 fnames = natsorted(fnames)
 
-csv_file = open("1news_korean.csv", "w", newline='')
+csv_file = open("1news_korean.csv", "w", newline='', encoding="utf-8")
 news_writer = csv.writer(csv_file, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)
 
 for fname in fnames:

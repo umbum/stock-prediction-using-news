@@ -6,9 +6,9 @@ from pprint import pprint
 import csv
 
 
-# src = open("./1news_korean.csv", 'r', newline='')
-# dst = open("./2news_keystatement.csv", 'w', newline='')
-# dst2 = open("./2news_excepted.csv", 'w', newline='')
+src = open("./1news_korean.csv", 'r', newline='', encoding="utf-8")
+dst = open("./2news_keystatement.csv", 'w', newline='', encoding="utf-8")
+dst2 = open("./2news_excepted.csv", 'w', newline='', encoding="utf-8")
 
 src_reader = csv.reader(src, delimiter=",", quotechar="|")
 dst_writer = csv.writer(dst, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)

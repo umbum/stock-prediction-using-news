@@ -8,8 +8,8 @@ import time
 
 start_date = "2017.12.31"
 end_date = "2017.01.01"
-src = open("./3news_preprocessed.csv", 'r', newline='')
-dst = open("./4news_translated{}-{}.csv".format(start_date, end_date), 'w', newline='')
+src = open("./3news_preprocessed.csv", 'r', newline='', encoding="utf-8")
+dst = open("./4news_translated{}-{}.csv".format(start_date, end_date), 'w', newline='', encoding="utf-8")
 
 src_lock = threading.Lock()
 dst_lock = threading.Lock()

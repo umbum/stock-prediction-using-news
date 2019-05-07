@@ -4,10 +4,6 @@ from gensim.models import Word2Vec
 import gensim.downloader as api
 import pickle
 
-src = open("./5news_IE.csv", 'r', newline='')
-src_reader = csv.reader(src, delimiter=",", quotechar="|")
-dst = open("./6news_vectors.pickle", "wb")
-
 ### corpus를 사용하는 부분. 매번 학습을 다시 시켜야해서 그냥 full model을 load해서 쓰는게 낫다.
 # corpus_name = "text8"
 # print("[download|load {} to|from ~/gensim-data/{}]".format(corpus_name, corpus_name))
@@ -21,6 +17,10 @@ print("[download|load {} to|from ~/gensim-data/{}]".format(model_name, model_nam
 model = api.load(model_name)
 print(model.most_similar("samsung"))
 print(model.most_similar("unveil"))
+
+src = open("./5news_IE.csv", 'r', newline='', encoding="utf-8")
+src_reader = csv.reader(src, delimiter=",", quotechar="|")
+dst = open("./6news_vectors.pickle", "wb")
 
 def getWordVector(word : str):
     word_list = word.split()
