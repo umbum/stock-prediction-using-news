@@ -1,11 +1,10 @@
-#!/usr/bin/python
 #-*- coding: cp949 -*-
 #-*- coding: utf-8 -*- 
 
 #	먼저 CybosPlus에 접속한다.
-#	특정한 주가에 대해	1996/12/26일부터 현재까지 주가 정보를 받아온다.
+#	특정한 주가에 대해	최대 1996/12/26일부터 현재까지 주가 정보를 받아온다. 기간 보다 짧을 시 최대로 주가를 받아온다.	
 #	주가에대해 기술적 지표를 계산하고 엑셀로 저장한다.
-#
+
 import sys
 from PyQt5.QtWidgets import *
 import win32com.client
@@ -16,8 +15,8 @@ import numpy as np
 
 g_objCodeMgr = win32com.client.Dispatch('CpUtil.CpCodeMgr')
 g_objCpStatus = win32com.client.Dispatch('CpUtil.CpCybos')
- 
- 
+
+
 class CpStockChart:
 	def __init__(self):
 		self.objStockChart = win32com.client.Dispatch("CpSysDib.StockChart")
@@ -82,6 +81,7 @@ class MyWindow(QMainWindow):
 		self.roc =[]
 		self.obv =[]
 		self.y_label=[]
+	
 		# 윈도우 버튼 배치
 		self.setWindowTitle("PLUS API TEST")
 		nH = 20
@@ -89,11 +89,12 @@ class MyWindow(QMainWindow):
 		self.codeEdit = QLineEdit("", self)
 		self.codeEdit.move(20, nH)
 		self.codeEdit.textChanged.connect(self.codeEditChanged)
-		self.codeEdit.setText('00660')
+		
 		self.label = QLabel('종목코드', self)
 		self.label.move(140, nH)
 		nH += 50
- 
+		
+
 		btchart1= QPushButton("기간(일간) 요청", self)
 		btchart1.move(20, nH)
 		btchart1.clicked.connect(self.btchart1_clicked)
@@ -115,7 +116,7 @@ class MyWindow(QMainWindow):
 		nH += 50
  
 		self.setGeometry(300, 300, 300, nH)
-		self.setCode('A000660')
+		
  
 	# 기간(일간) 으로 받기
 	def btchart1_clicked(self):
@@ -145,8 +146,8 @@ class MyWindow(QMainWindow):
 		print('지표계산 완료')
 
 	def btchart7_clicked(self):
-		charfile = 'chart.xlsx'
-        
+		charfile = 'C:/Users/thwjd/sourc/Capston/data/'+self.label.text()+'.xlsx'
+		
 		chartData = {'일자' : self.dates,
 					'시가' : self.opens,
 					'고가' : self.highs,
@@ -168,7 +169,7 @@ class MyWindow(QMainWindow):
 					'전날대비증가량' : self.y_label,
 					}
 		df =pd.DataFrame(chartData, columns=['일자','시가','고가','저가','종가','거래량','MACD','EMA','Momentum','slowK','slowD','ROC','william_R','A/D','RSI','OBV','upperband','lowerband','전날대비증가량'])
-      
+
  
 		df = df.set_index('일자')
  
@@ -184,7 +185,7 @@ class MyWindow(QMainWindow):
 	def codeEditChanged(self):
 		code = self.codeEdit.text()
 		self.setCode(code)
- 
+		
 	def setCode(self, code):
 		if len(code) < 6:
 			return
@@ -200,7 +201,8 @@ class MyWindow(QMainWindow):
  
 		self.label.setText(name)
 		self.code = code
- 
+		
+		
  
 	def btnExit_clicked(self):
 		exit()
