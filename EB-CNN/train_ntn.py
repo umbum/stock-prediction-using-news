@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import copy
+import pickle
 import random
 import sys
 import math
@@ -8,11 +10,14 @@ import numpy as np
 import scipy.stats as stats
 
 from sklearn.datasets import load_digits
-from keras import backend as K
 from keras.engine.topology import Layer
 from keras.optimizers import SGD
 from keras.layers import subtract, add, Input
 from keras.models import Model, load_model
+from keras import backend as K
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
+print(K.tensorflow_backend._get_available_gpus())
 
 with open('EB-CNN.yaml', 'r', encoding='UTF8') as f_yaml:
   parser = yaml.load(f_yaml)
@@ -40,11 +45,11 @@ class NeuralTensorLayer(Layer):
     d = self.input_dim
     initial_T_values = stats.truncnorm.rvs(-2 * std, 2 * std, loc=mean, scale=std, size=(k,d,d))
     initial_W_values = stats.truncnorm.rvs(-2 * std, 2 * std, loc=mean, scale=std, size=(k,2*d))
-    self.T1 = K.variable(initial_T_values, name='T1')
-    self.T2 = K.variable(initial_T_values, name='T2')
-    self.T3 = K.variable(initial_T_values, name='T3')
-    self.W = K.variable(initial_W_values, name='W')
-    self.b = K.zeros((k,1),name='b')
+    self.T1 = K.variable(initial_T_values, name='T1',dtype='float32')
+    self.T2 = K.variable(initial_T_values, name='T2',dtype='float32')
+    self.T3 = K.variable(initial_T_values, name='T3',dtype='float32')
+    self.W = K.variable(initial_W_values, name='W',dtype='float32')
+    self.b = K.zeros((k,1),name='b',dtype='float32')
     self.trainable_weights = [self.T1, self.T2, self.T3, self.W, self.b]
 
 
@@ -56,6 +61,7 @@ class NeuralTensorLayer(Layer):
 
     # e1, p, e2 are each shape (?,d)
     # '?' is batch size
+
     e1 = inputs[0]
     p = inputs[1]
     e2 = inputs[2]
@@ -93,21 +99,21 @@ class NeuralTensorLayer(Layer):
 
     #print(K.dot( K.reshape(e1[0],(1,64)), T[0]),":K.dot( K.reshape(e1[0],(1,64)), T[0])") #(1,64)
     #print( K.transpose(e2[0]) , ": K.transpose(e2[0])") #(64, )
-    bilinear_tensor_products = K.dot(K.dot( K.reshape(e1[0],(1,64)), T[0]), K.reshape(K.transpose(e2[0]),(64,1)))
+    bilinear_tensor_products = K.dot(K.dot( K.reshape(e1[0],(1,d)), T[0]), K.reshape(K.transpose(e2[0]),(d,1)))
     #print(bilinear_tensor_products, "!!")  #(1,1)
 
 
     # iterate 'bs' times for batch processing
     for j in range(self.bs)[1:]:
-      btp = K.dot(K.dot( K.reshape(e1[j],(1,64)), T[0]), K.reshape(K.transpose(e2[j]),(64,1)))
+      btp = K.dot(K.dot( K.reshape(e1[j],(1,d)), T[0]), K.reshape(K.transpose(e2[j]),(d,1)))
       bilinear_tensor_products = K.concatenate([bilinear_tensor_products, btp])
       #print(bilinear_tensor_products, "??")
 
     #interate for 'K' size
     for i in range(k)[1:]:
-      btpt =  K.dot(K.dot( K.reshape(e1[0],(1,64)), T[i]), K.reshape(K.transpose(e2[0]),(64,1)))
+      btpt =  K.dot(K.dot( K.reshape(e1[0],(1,d)), T[i]), K.reshape(K.transpose(e2[0]),(d,1)))
       for j in range(self.bs)[1:]:
-        btp =  K.dot(K.dot( K.reshape(e1[j],(1,64)), T[i]), K.reshape(K.transpose(e2[j]),(64,1)))
+        btp =  K.dot(K.dot( K.reshape(e1[j],(1,d)), T[i]), K.reshape(K.transpose(e2[j]),(d,1)))
         btpt = K.concatenate([btpt, btp])
       #print(btpt, "??")
 
@@ -129,12 +135,12 @@ def custom_loss(oup,bs):
     #print(y_pre,":y_pre")
     #print(y_pre[0,:,1],":y_pre[0,:,1]")
     temp1 = K.tf.maximum(subtract([y_pre[0,:,1], y_pre[0,:,0]]) + 1, 0)
-    temp1 = K.print_tensor(temp1, message="temp1:1th batch")
+    #temp1 = K.print_tensor(temp1, message="temp1:1th batch")
     temp1 = K.tf.reduce_sum(temp1)
     temp1 = K.print_tensor(temp1, message="temp1:1th batch")
     for i in range(1,bs):
       temp1s = K.tf.maximum(subtract([y_pre[i,:,1],y_pre[i,:,0]]) + 1, 0)
-      temp1s = K.print_tensor(temp1s, message="temp1:%dth batch"%(i+1))
+      #temp1s = K.print_tensor(temp1s, message="temp1:%dth batch"%(i+1))
       temp1s = K.tf.reduce_sum(temp1s)
       temp1 = K.concatenate([K.reshape(temp1,(1,i)), K.reshape(temp1s,(1,1))])
       temp1 = K.print_tensor(temp1, message="temp1:after calc %dth batch" % (i+1))
@@ -147,13 +153,13 @@ def custom_loss(oup,bs):
     for i in range(0,5):
       temp2.append(K.tf.reduce_sum(K.tf.square(varis[i])))
     #print(temp2)
-    temp2 = K.print_tensor(temp2, message="Value of temp2")
+    #temp2 = K.print_tensor(temp2, message="Value of temp2")
     temp2 = K.tf.reduce_sum(temp2)
     #print(temp2)
     temp2 = K.print_tensor(temp2, message="Value of temp2")
-    temp = temp1 + (([0.000001]) * temp2)
+    temp = temp1 + (([0.00000001]) * temp2)
     temp = K.print_tensor(temp, message="Value of temp1+temp2*0.000001")
-
+    #print(temp,": temp")
     return temp
   return contrastive_loss
 
@@ -189,12 +195,36 @@ def main():
   X_test = X_test.astype(np.float32)
   Y_test = Y_test.astype(np.float32)
 
+  word_vec = []
+  w_sub = []
+  w_act = []
+  w_obj = []
 
+  vec_len = 256
+  #vec_len = 0
 
-  model.fit([X_train*(random.getrandbits(2)/1000), X_train*(random.getrandbits(2)/1000),
-             X_train*(random.getrandbits(2)/1000), X_train*(random.getrandbits(2)/1000)],Y_train , epochs=parser['ntn_epoch'], batch_size=bs)
-  score = model.evaluate([X_test*(random.getrandbits(2)/1000), X_test*(random.getrandbits(2)/1000),
-                          X_test*(random.getrandbits(2)/1000), X_test*(random.getrandbits(2)/1000)], Y_test, batch_size=bs)
+  with open('6news_vectors.pickle', 'rb') as f:
+    for i in range(0,vec_len):
+      try:
+        pic = pickle.load(f)
+        #word_vec.append(pic)
+        w_sub.append(pic['subject'].astype(np.float32))
+        w_act.append(pic['action'].astype(np.float32))
+        w_obj.append(pic['object'].astype(np.float32))
+        #vec_len++
+      except (EOFError):
+        break
+
+  w_subr = copy.deepcopy(w_obj)
+  random.shuffle(w_subr)
+
+  print(w_sub[0].dtype)
+  Y_tr = np.zeros(vec_len).astype(np.float32)
+
+  model.fit([w_sub[:vec_len//4], w_act[:vec_len//4], w_obj[:vec_len//4],w_subr[:vec_len//4]], Y_tr[:vec_len//4] , epochs=parser['ntn_epoch'], batch_size=bs)
+  #model.fit([np.kron(X_train,np.ones(3))*(random.getrandbits(2)/1000), np.kron(X_train,np.ones(3))*(random.getrandbits(2)/1000),
+  #           np.kron(X_train, np.ones(3))*(random.getrandbits(2)/1000), np.kron(X_train,np.ones(3))*(random.getrandbits(2)/1000)], Y_tr, epochs=parser['ntn_epoch'], batch_size=bs)
+  score = model.evaluate([w_sub, w_act, w_obj,w_subr], Y_tr, batch_size=bs)
   print(score)
 
   model.save(parser['ntn_mod_name'])

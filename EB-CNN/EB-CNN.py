@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import copy
+import pickle
 import yaml
 import numpy as np
 import random
@@ -10,6 +12,8 @@ from keras.models import Model, load_model
 from train_ntn import NeuralTensorLayer, custom_loss, get_data
 from train_cnn import ConvolutionalNN, binary_classification_loss
 from tensorflow.contrib.data import sliding_window_batch
+
+
 
 with open('EB-CNN.yaml', 'r', encoding='UTF8') as f_yaml:
     parser = yaml.load(f_yaml)
@@ -30,11 +34,34 @@ def main():
     X_test = X_test.astype(np.float32)
     Y_test = Y_test.astype(np.float32)
 
-    print(np.shape(X_test))
+    #print(np.shape(X_test))
+
+    word_vec = []
+    w_sub = []
+    w_act = []
+    w_obj = []
+
+
+    vec_len = 0
+
+    with open('6news_vectors.pickle', 'rb') as f:
+        for i in range(0, vec_len):
+            try:
+                pic = pickle.load(f)
+                # word_vec.append(pic)
+                w_sub.append(pic['subject'].astype(np.float32))
+                w_act.append(pic['action'].astype(np.float32))
+                w_obj.append(pic['object'].astype(np.float32))
+                vec_len += 1
+            except (EOFError):
+                break
+
+    w_subr = copy.deepcopy(w_obj)
+    random.shuffle(w_subr)
+
 
     ntn_model = load_model(parser['ntn_mod_name'],custom_objects={'NeuralTensorLayer':NeuralTensorLayer, 'contrastive_loss':custom_loss(ntn_oup,ntn_bs)})
-    ntn_out = ntn_model.predict([X_test*(random.getrandbits(2)/1000), X_test*(random.getrandbits(2)/1000)
-                , X_test*(random.getrandbits(2)/1000), X_test*(random.getrandbits(2)/1000)],batch_size=ntn_bs)
+    ntn_out = ntn_model.predict([w_sub, w_act, w_obj,w_subr],batch_size=ntn_bs)
     print(np.shape(ntn_out[:,:,0]))
     u_vec =ntn_out[:,:,0]
 
@@ -49,7 +76,7 @@ def main():
         json.dump(json_u, codecs.open(parser['u_vector_path'], 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True, indent=4)
         print("U-vector saved.")
 
-
+    """
     u_vec = np.asarray(u_vec_d)
     m = len(u_vec) // ul
 
@@ -80,7 +107,7 @@ def main():
     with open(parser['bin_class_path'], 'wb'):
         json.dump(json_bin_class, codecs.open(parser['bin_class_path'], 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True, indent=4)
         print("Binary-classification result saved.")
-
+    """
 
 if __name__ == "__main__" :
     main()

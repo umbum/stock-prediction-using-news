@@ -1,12 +1,12 @@
-data_day: 2   # ntn batch size. and also, data in a day
+data_day: 1   # ntn batch size. and also, data in a day
 
-ntn_output: 64     # must be multiple of 2
-ntn_input: 64
+ntn_output: 300     # must be multiple of 2
+ntn_input: 300
 ntn_epoch: 1
 ntn_mod_name: 'ntn.h5'
 
-cnn_output: 64
-cnn_input: 64
+cnn_output: 300
+cnn_input: 300
 cnn_window: 3
 cnn_bs: 32
 cnn_epoch: 1
