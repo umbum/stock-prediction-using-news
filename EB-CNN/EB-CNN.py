@@ -45,7 +45,7 @@ def main():
     vec_len = 0
 
     with open('6news_vectors.pickle', 'rb') as f:
-        for i in range(0, vec_len):
+        while True:
             try:
                 pic = pickle.load(f)
                 # word_vec.append(pic)
