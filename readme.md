@@ -12,7 +12,7 @@ ex) In anaconda prompt,
 $set CONDA_FORCE_32BIT=1
 $conda create -n (name of env) python=(python version)
 ```
-Then, you got 32bit python vertual environment.  
+Then, you got 32bit python virtual environment.  
 ```
 $deactivate 
 or
