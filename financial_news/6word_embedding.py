@@ -20,7 +20,7 @@ print(model.most_similar("unveil"))
 
 src = open("./5news_IE.csv", 'r', newline='', encoding="utf-8")
 src_reader = csv.reader(src, delimiter=",", quotechar="|")
-dst = open("./6news_vectors.pickle", "wb")
+dst = open("../data/6news_vectors.pickle", "wb")
 
 def getWordVector(word : str):
     word_list = word.split()
