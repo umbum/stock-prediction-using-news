@@ -51,10 +51,9 @@ def normalize_data(data, length):		# 데이터 범위를 0,1 사이로 변환시킨다.
 
 #주가 데이터를 불러오고 정규화까지 시킨다.
 def load_data(stock_name, time_step):		
-	data_temp = np.load(stock_name+'_data.npy')
-	x_temp = np.load(stock_name+'_x_label.npy')
-	y_temp = np.load(stock_name+'_y_label.npy')
-	
+	data_temp = np.load(stock_name+'_data.npy', allow_pickle=True)
+	x_temp = np.load(stock_name+'_x_label.npy', allow_pickle=True)
+	y_temp = np.load(stock_name+'_y_label.npy', allow_pickle=True)
 	x_temp = normalize_data(x_temp[34:-1],12)			# 34번째 데이터 부터 데이터가 존재, 마지막데이터는 예측 할 수 없기에 뺀다
 	close = normalize_data(data_temp[35+time_step:, 4],1)			# time_stpe이후 35번째 부터 예측 가능
 
@@ -108,6 +107,7 @@ if __name__ == '__main__':
 		parser = yaml.load(f_yaml)
 	
 	data_temp = np.load('./data_label/SK하이닉스_data.npy')
+	
 	non_norm_close = []
 	
 	for i in data_temp[135:,4]:		# 34+100+1 -> 34개부터 기술적 지표가 모두 있음, timestep 100, 하루뒤 예측 1
@@ -127,16 +127,16 @@ if __name__ == '__main__':
 	leng = len(x_label)			
 	
 	# development_set을 0.9 validation_set을 0.1로 맞춘다.
-	x_dev_label = x_label[:int(leng*0.9),:,:]	
-	x_val_label = x_label[int(leng*0.9):,:,:]
+	x_dev_label = x_label[:int(leng*0.9),:,:]	# 19961226 ~ 20160621
+	x_val_label = x_label[int(leng*0.9):,:,:]	
 	close_dev = normal_close[:int(leng*0.9),:]
 	close_val = normal_close[int(leng*0.9):,:]
 
 	model, m_name = get_model(argDic = parser['model'])
 
-	predict_model(model,'C:/Users/thwjd/source/stock_predict/networks/sk_predict_model010/1012-0.0103-1860.3714.h5'
-			   ,non_norm_close[int(leng*0.9):],under,close_min)
-	exit()
+	#predict_model(model,'C:/Users/thwjd/source/stock_predict/networks/sk_predict_model010/1012-0.0103-1860.3714.h5'
+	#		   ,non_norm_close[int(leng*0.9):],under,close_min)
+	#exit()
 
 	save_dir = parser['save_dir'] + parser['name'] + '/'
 
@@ -175,10 +175,20 @@ if __name__ == '__main__':
 		
 		#model.fit(x_dev_label,close_temp[:int(leng*0.9),:], batch_size = 100, epochs = 1, verbose=1)
 		hist = model.fit(x_dev_label,close_dev, batch_size = parser['batch_size'], epochs = 1, verbose=1)
+		t = Model(inputs=model.get_layer('input_1').input, outputs=model.get_layer('code').output)
 
+		#t_vector = t.predict(x_dev_label,batch_size=parser['batch_size'], verbose = 1, steps = None)
+		#print(t_vector.shape) # 4905x64 64차원이 t-vector 
+		#np.save('t-vector',t_vector)
+		#exit()
+		
+		
 		#학습된 모델로 validation_set을 평가한다.
 		result = model.predict(x_val_label, batch_size=parser['batch_size'], verbose=1, steps=None)
-
+		t_vector = t.predict(x_val_label,batch_size=parser['batch_size'], verbose = 1, steps = None)
+		print(t_vector.shape) # 4905x64 64차원이 t-vector 
+		np.save('t-vector_val',t_vector)
+		exit()
 		#평가 결과를 역정규화하여 종가 값으로 표현한다.
 		close_predict = (result*under)+close_min
 		
@@ -188,8 +198,8 @@ if __name__ == '__main__':
 
 		print('epoch: %d, val_mae: %f \n'%(int(epoch), val_mae))
 		f_eer.write('epoch: %d, val_mae: %f \n'%(int(epoch), val_mae))
-
+		exit()
 		#save_graph(non_norm_close[int(leng*0.9):], close_predict,epoch,val_mae ,save_dir)
-		model.save_weights(save_dir + '%d-%.4f-%.4f.h5'%(epoch, hist.history['loss'][0], val_mae))
+		#model.save_weights(save_dir + '%d-%.4f-%.4f.h5'%(epoch, hist.history['loss'][0], val_mae))
 	f_eer.close()
 		

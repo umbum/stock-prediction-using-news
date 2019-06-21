@@ -3,9 +3,9 @@ optimizer: Adam                                         # 사용할 optimizer �
 opt_decay: 0.0001
 amsgrad: 1
 lr: 0.001                                               # 사용할 learning rate 명시
-epoch: 5000                                              # 학습 epoch 수 명시
+epoch: 50000                                              # 학습 epoch 수 명시
 save_dir: E:/source/stock_predict/networks/              # 모델 저장 경로
-name: sk_updown_predict_model003                               # 모델 저장하는 폴더 명
+name: kospi_updown_predict_model002                               # 모델 저장하는 폴더 명
 loss_function: sparse_categorical_crossentropy
 
 #DNN 모델 관련 파라미터들

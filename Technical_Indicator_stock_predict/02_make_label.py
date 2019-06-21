@@ -1,10 +1,10 @@
 #-*- coding: cp949 -*-
 #-*- coding: utf-8 -*- 
 
-#	data í´ë”ì— ì €ì¥ëœ ì—‘ì…€ë“¤ì„ ë¶ˆëŸ¬ì˜¨ë‹¤.
-#	ì¼ì, ì‹œê°€, ê³ ê°€, ì €ê°€, ì¢…ê°€, ê±°ë˜ëŸ‰ì€ ì£¼ê°€ì´ë¦„_dataë¡œ ì €ì¥
-#	MACD, EMA, Momentum, SlowK, SlowD, ROC, William_R, A/D, RSI, OBV, upperband, lowerbandëŠ” ê¸°ìˆ ì  ì§€í‘œë¡œì„œ í•™ìŠµì— ì‚¬ìš©ë  ì£¼ê°€ì´ë¦„_X_labelë¡œ ì €ì¥
-#	ì „ë‚ ëŒ€ë¹„ ì¦ê°€ëŸ‰ì€ ì£¼ê°€ì´ë¦„_y_labelë¡œ ì €ì¥
+#	data Æú´õ¿¡ ÀúÀåµÈ ¿¢¼¿µéÀ» ºÒ·¯¿Â´Ù.
+#	ÀÏÀÚ, ½Ã°¡, °í°¡, Àú°¡, Á¾°¡, °Å·¡·®Àº ÁÖ°¡ÀÌ¸§_data·Î ÀúÀå
+#	MACD, EMA, Momentum, SlowK, SlowD, ROC, William_R, A/D, RSI, OBV, upperband, lowerband´Â ±â¼úÀû ÁöÇ¥·Î¼­ ÇĞ½À¿¡ »ç¿ëµÉ ÁÖ°¡ÀÌ¸§_X_label·Î ÀúÀå
+#	Àü³¯´ëºñ Áõ°¡·®Àº ÁÖ°¡ÀÌ¸§_y_label·Î ÀúÀå
 
 from openpyxl import load_workbook
 import numpy as np
@@ -34,7 +34,6 @@ if __name__ == '__main__':
 				for d in i:
 					data.append(d.value)
 
-		
 				datas.append(data[:6])
 				x_labels.append(data[6:-1])
 				y_labels.append(data[-1])
