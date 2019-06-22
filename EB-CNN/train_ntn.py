@@ -1,5 +1,12 @@
+"""
+NTN 신경망 모델을 학습시키는 모듈
+
+6news_vectors_100.pickle 파일이 같은 디렉토리 안에 있어야함.
+"""
+
 from __future__ import print_function
 
+import os
 import copy
 import pickle
 import random
@@ -9,6 +16,8 @@ import yaml
 import numpy as np
 import scipy.stats as stats
 
+from keras.callbacks import ModelCheckpoint
+from keras.callbacks import EarlyStopping
 from sklearn.datasets import load_digits
 from keras.engine.topology import Layer
 from keras.optimizers import SGD
@@ -24,7 +33,7 @@ with open('EB-CNN.yaml', 'r', encoding='UTF8') as f_yaml:
 
 inp = parser['ntn_input']
 oup = parser['ntn_output']
-bs = parser['data_day']
+bs = parser['ntn_bs']
 
 class NeuralTensorLayer(Layer):
 
@@ -45,6 +54,7 @@ class NeuralTensorLayer(Layer):
     d = self.input_dim
     initial_T_values = stats.truncnorm.rvs(-2 * std, 2 * std, loc=mean, scale=std, size=(k,d,d))
     initial_W_values = stats.truncnorm.rvs(-2 * std, 2 * std, loc=mean, scale=std, size=(k,2*d))
+
     self.T1 = K.variable(initial_T_values, name='T1',dtype='float32')
     self.T2 = K.variable(initial_T_values, name='T2',dtype='float32')
     self.T3 = K.variable(initial_T_values, name='T3',dtype='float32')
@@ -97,8 +107,8 @@ class NeuralTensorLayer(Layer):
     #print(feed_forward_product, ":ffp")
 
 
-    #print(K.dot( K.reshape(e1[0],(1,64)), T[0]),":K.dot( K.reshape(e1[0],(1,64)), T[0])") #(1,64)
-    #print( K.transpose(e2[0]) , ": K.transpose(e2[0])") #(64, )
+    #print(K.dot( K.reshape(e1[0],(1,64)), T[0]),":K.dot( K.reshape(e1[0],(1,64)), T[0])") #(1,d)
+    #print( K.transpose(e2[0]) , ": K.transpose(e2[0])") #(d, )
     bilinear_tensor_products = K.dot(K.dot( K.reshape(e1[0],(1,d)), T[0]), K.reshape(K.transpose(e2[0]),(d,1)))
     #print(bilinear_tensor_products, "!!")  #(1,1)
 
@@ -115,6 +125,7 @@ class NeuralTensorLayer(Layer):
       for j in range(self.bs)[1:]:
         btp =  K.dot(K.dot( K.reshape(e1[j],(1,d)), T[i]), K.reshape(K.transpose(e2[j]),(d,1)))
         btpt = K.concatenate([btpt, btp])
+        #print(btpt, "~~")
       #print(btpt, "??")
 
       bilinear_tensor_products = K.concatenate([bilinear_tensor_products, btpt], axis=0)
@@ -129,26 +140,26 @@ class NeuralTensorLayer(Layer):
     return r
 
 # variation of socher's contrastive max-margin objective function = xiao ding paper loss
-def custom_loss(oup,bs):
-  def contrastive_loss(y_true, y_pre):
-    y_pre = K.print_tensor(y_pre, message="Value of u,ur")
+def custom_loss(y_true, y_pre):
+    #y_pre = K.print_tensor(y_pre, message="Value of u,ur")
     #print(y_pre,":y_pre")
     #print(y_pre[0,:,1],":y_pre[0,:,1]")
+    bs = K.get_value(K.shape(y_pre[:,0,0])[0])
     temp1 = K.tf.maximum(subtract([y_pre[0,:,1], y_pre[0,:,0]]) + 1, 0)
     #temp1 = K.print_tensor(temp1, message="temp1:1th batch")
     temp1 = K.tf.reduce_sum(temp1)
-    temp1 = K.print_tensor(temp1, message="temp1:1th batch")
+    #temp1 = K.print_tensor(temp1, message="temp1:1th batch")
     for i in range(1,bs):
       temp1s = K.tf.maximum(subtract([y_pre[i,:,1],y_pre[i,:,0]]) + 1, 0)
       #temp1s = K.print_tensor(temp1s, message="temp1:%dth batch"%(i+1))
       temp1s = K.tf.reduce_sum(temp1s)
       temp1 = K.concatenate([K.reshape(temp1,(1,i)), K.reshape(temp1s,(1,1))])
-      temp1 = K.print_tensor(temp1, message="temp1:after calc %dth batch" % (i+1))
+      #temp1 = K.print_tensor(temp1, message="temp1:after calc %dth batch" % (i+1))
     varis =[]
     [varis.append(var) for var in  K.tf.trainable_variables()]
-    for i in range(0, 5):
+    #for i in range(0, 5):
       #print(varis[i],"varis[%i]"%(i))
-      varis[i] = K.print_tensor(varis[i], message="Value of varis%d"%(i))
+      #varis[i] = K.print_tensor(varis[i], message="Value of varis%d"%(i))
     temp2 = []
     for i in range(0,5):
       temp2.append(K.tf.reduce_sum(K.tf.square(varis[i])))
@@ -156,12 +167,11 @@ def custom_loss(oup,bs):
     #temp2 = K.print_tensor(temp2, message="Value of temp2")
     temp2 = K.tf.reduce_sum(temp2)
     #print(temp2)
-    temp2 = K.print_tensor(temp2, message="Value of temp2")
+    #temp2 = K.print_tensor(temp2, message="Value of temp2")
     temp = temp1 + (([0.00000001]) * temp2)
-    temp = K.print_tensor(temp, message="Value of temp1+temp2*0.000001")
+    #temp = K.print_tensor(temp, message="Value of temp1+temp2*0.00000001")
     #print(temp,": temp")
     return temp
-  return contrastive_loss
 
 
 def get_data(bs):
@@ -188,7 +198,7 @@ def main():
   model = Model(inputs=[input1, input2, input3, input4], outputs=[btp])
 
   sgd = SGD(lr=0.0001, decay=1e-6, momentum=0.9, nesterov=True)
-  model.compile(loss=custom_loss(oup,bs), optimizer=sgd)
+  model.compile(loss=custom_loss, optimizer=sgd ,metrics=[custom_loss])
   X_train, Y_train, X_test, Y_test = get_data(bs)
   X_train = X_train.astype(np.float32)
   Y_train = Y_train.astype(np.float32)
@@ -200,31 +210,40 @@ def main():
   w_act = []
   w_obj = []
 
-  vec_len = 256
-  #vec_len = 0
+  #vec_len = 8
+  vec_len = 0
 
-  with open('6news_vectors.pickle', 'rb') as f:
-    for i in range(0,vec_len):
+  with open('6news_vectors_100.pickle', 'rb') as f:
+    while True:
       try:
         pic = pickle.load(f)
         #word_vec.append(pic)
         w_sub.append(pic['subject'].astype(np.float32))
         w_act.append(pic['action'].astype(np.float32))
         w_obj.append(pic['object'].astype(np.float32))
-        #vec_len++
+        vec_len+=1
       except (EOFError):
         break
 
   w_subr = copy.deepcopy(w_obj)
   random.shuffle(w_subr)
 
-  print(w_sub[0].dtype)
+  #print(w_sub[0].dtype)
   Y_tr = np.zeros(vec_len).astype(np.float32)
 
-  model.fit([w_sub[:vec_len//4], w_act[:vec_len//4], w_obj[:vec_len//4],w_subr[:vec_len//4]], Y_tr[:vec_len//4] , epochs=parser['ntn_epoch'], batch_size=bs)
+  MODEL_SAVE_FOLDER_PATH = './model/'
+  if not os.path.exists(MODEL_SAVE_FOLDER_PATH):
+    os.mkdir(MODEL_SAVE_FOLDER_PATH)
+
+  model_path = MODEL_SAVE_FOLDER_PATH + '{epoch:02d}-{custom_loss:.4f}.hdf5'
+  cb_checkpoint = ModelCheckpoint(filepath=model_path, monitor='custom_loss',
+                                  verbose=1, save_best_only=True)
+  cb_early_stopping = EarlyStopping(monitor='custom_loss', patience=100)
+  model.fit([w_sub[:(vec_len//5)*4], w_act[:(vec_len//5)*4], w_obj[:(vec_len//5)*4],w_subr[:(vec_len//5)*4]], Y_tr[:(vec_len//5)*4] ,
+            epochs=parser['ntn_epoch'], batch_size=bs,callbacks=[cb_early_stopping,cb_checkpoint])
   #model.fit([np.kron(X_train,np.ones(3))*(random.getrandbits(2)/1000), np.kron(X_train,np.ones(3))*(random.getrandbits(2)/1000),
   #           np.kron(X_train, np.ones(3))*(random.getrandbits(2)/1000), np.kron(X_train,np.ones(3))*(random.getrandbits(2)/1000)], Y_tr, epochs=parser['ntn_epoch'], batch_size=bs)
-  score = model.evaluate([w_sub, w_act, w_obj,w_subr], Y_tr, batch_size=bs)
+  score = model.evaluate([w_sub[(vec_len//5)*4:], w_act[(vec_len//5)*4:], w_obj[(vec_len//5)*4:],w_subr[(vec_len//5)*4:]], Y_tr[(vec_len//5)*4:], batch_size=bs)
   print(score)
 
   model.save(parser['ntn_mod_name'])

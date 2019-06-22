@@ -1,16 +1,20 @@
-data_day: 1   # ntn batch size. and also, data in a day
+#설정 파일
 
-ntn_output: 300     # must be multiple of 2
-ntn_input: 300
-ntn_epoch: 1
+data_day: 300   # ntn batch size. and also, data in a day
+
+ntn_bs: 1
+ntn_output: 100     # must be multiple of 2
+ntn_input: 100
+ntn_epoch: 200
 ntn_mod_name: 'ntn.h5'
 
-cnn_output: 300
-cnn_input: 300
+cnn_output: 3072
+cnn_input: 3072
 cnn_window: 3
-cnn_bs: 32
-cnn_epoch: 1
+cnn_bs: 10
+cnn_epoch: 10
 cnn_mod_name: 'cnn.h5'
+
 
 long_term: 30
 mid_term: 7
