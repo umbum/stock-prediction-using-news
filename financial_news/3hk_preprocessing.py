@@ -1,20 +1,24 @@
+# @author       umbum (umbum7601@gmail.com)
+# @date         2019/04/22
+# ./2news_keystatement.csv에 전처리를 적용한 ./3news_preprocessed.csv를 생성하는 스크립트
+
+
 """
 preprocessing
 
 1. (.*) 제거
 2. [.*] 제거
-3. # ◇ =같은 특수 문자 제거도 해야하지만... 이런 뉴스가 많지는 않아서 놔둔다.
 """
 from pprint import pprint
 import csv
 import re
 
 
-# src = open("./2news_keystatement.csv", 'r', newline='')
-# dst = open("./3news_preprocessed.csv", 'w', newline='')
+src = open("../data/news/2news_keystatement.csv", 'r', newline='')
+dst = open("../data/news/3news_preprocessed.csv", 'w', newline='')
 
-# src_reader = csv.reader(src, delimiter=",", quotechar="|")
-# dst_writer = csv.writer(dst, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)
+src_reader = csv.reader(src, delimiter=",", quotechar="|")
+dst_writer = csv.writer(dst, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)
 
 
 def preprocess(s):

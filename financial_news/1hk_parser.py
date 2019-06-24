@@ -1,3 +1,6 @@
+# @author       umbum (umbum7601@gmail.com)
+# @date         2019/04/22
+# 뉴스 HTML 파일들을 파싱해 [day, time, title, summary]로 구성된 row들로 이루어진 ./1news_korean.csv를 생성하는 스크립트
 
 from bs4 import BeautifulSoup
 import csv
@@ -22,15 +25,15 @@ from natsort import natsorted
 
 # csv format : 2019.04.08,15:24,타이틀,요약문
 
-fnames = os.listdir("../htmls")
+fnames = os.listdir("../data/news/htmls")
 fnames = natsorted(fnames)
 
-csv_file = open("1news_korean.csv", "w", newline='', encoding="utf-8")
+csv_file = open("../data/news/1news_korean.csv", "w", newline='', encoding="utf-8")
 news_writer = csv.writer(csv_file, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)
 
 for fname in fnames:
     print(fname)
-    with open("../htmls/{}".format(fname), "r") as f:
+    with open("../data/news/htmls/{}".format(fname), "r") as f:
         html_str = f.read()
 
     soup = BeautifulSoup(html_str, "html.parser")

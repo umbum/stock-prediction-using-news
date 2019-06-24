@@ -1,3 +1,8 @@
+# @author       umbum (umbum7601@gmail.com)
+# @date         2019/04/22
+# ./3news_preprocessed.csv의 한글 뉴스를 번역한 ./4news_translated{시작일}-{종료일}.csv를 생성하는 스크립트
+# google translation api를 사용하므로 이를 사용할 수 있는 환경이어야 한다.
+
 from pprint import pprint
 import csv
 import re
@@ -6,10 +11,10 @@ import html
 import threading
 import time
 
-start_date = "2017.12.31"
+start_date = "2019.12.31"
 end_date = "2017.01.01"
-src = open("./3news_preprocessed.csv", 'r', newline='', encoding="utf-8")
-dst = open("./4news_translated{}-{}.csv".format(start_date, end_date), 'w', newline='', encoding="utf-8")
+src = open("../data/news/3news_preprocessed.csv", 'r', newline='', encoding="utf-8")
+dst = open("../data/news/4news_translated.csv", 'w', newline='', encoding="utf-8")
 
 src_lock = threading.Lock()
 dst_lock = threading.Lock()

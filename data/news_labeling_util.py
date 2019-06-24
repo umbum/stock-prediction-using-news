@@ -1,14 +1,13 @@
 # @author       umbum (umbum7601@gmail.com)
 # @date         2019/05/29
-#
-import os
+# word2vec으로 생성된 바이너리 뉴스 데이터에 주가를 labeling해주는 스크립트
+
+import sys
 
 import os
 import numpy as np
 import pickle
 
-
-base_path = os.path.dirname(os.path.abspath(__file__))
 
 def labelingNewsIter(stock_file, news_file):
     """
@@ -42,8 +41,8 @@ def labelingNewsIter(stock_file, news_file):
 
 
     """
-    stock_data = np.load("{}/stock_label/{}".format(base_path, stock_file))
-    with open("{}/{}".format(base_path, news_file), "rb") as f:
+    stock_data = np.load(stock_file)
+    with open(news_file, "rb") as f:
         try:
             news = pickle.load(f)
             s_idx = -1
@@ -63,17 +62,20 @@ def labelingNewsIter(stock_file, news_file):
             pass
             
 
-
-    
-
 if __name__ == "__main__":
-    # TEST
-    stock_data = np.load("{}/stock_label/{}".format(base_path, "SK하이닉스_data.npy"))
+    if (len(sys.argv) == 3):
+        stock_file = sys.argv[1]
+        news_file = sys.argv[2]
+    else:
+        print("Usage : python {} <stock_label.npy> <event_vector.pickle>".format(__file__))
+        sys.exit()
+
+    stock_data = np.load(stock_file)
     print(stock_data[-310:-300])
     n = 0
     a = 0
     b = 0
-    for news, closing_price in labelingNewsIter("SK하이닉스_data.npy", "6news_vectors_100.pickle"):
+    for news, closing_price in labelingNewsIter(stock_file, news_file):
         a = news
         b = closing_price
         n = n + 1

@@ -1,3 +1,6 @@
+# @author       umbum (umbum7601@gmail.com)
+# @date         2019/05/03
+# 뉴스 csv를 읽어와 (날짜,시간) 순으로 정렬해주는 유틸리티
 
 import os, sys
 import csv

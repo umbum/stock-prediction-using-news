@@ -1,14 +1,14 @@
-"""
-핵심 문장 추출에 gensim을 사용하면 좋겠는데. gensim을 사용하려면 뉴스 전문이 있는게 좋으니까 newspaper4k 같은 걸로 뉴스 전문을 일단 받아야하고.
-시간이 이래저래 부족할 것 같아서, 일단은 페이지뷰에서 딸려온 뉴스 앞부분 텍스트에서 첫 번째 문장을 추출하고 이를 핵심 문장으로 간주했다.
-"""
+# @author       umbum (umbum7601@gmail.com)
+# @date         2019/04/22
+# ./1news_korean.csv의 각 row에서 핵심 문장을 추출한 결과인 ./2news_keystatement.csv를 생성하는 스크립트
+
 from pprint import pprint
 import csv
 
 
-src = open("./1news_korean.csv", 'r', newline='', encoding="utf-8")
-dst = open("./2news_keystatement.csv", 'w', newline='', encoding="utf-8")
-dst2 = open("./2news_excepted.csv", 'w', newline='', encoding="utf-8")
+src = open("../data/news/1news_korean.csv", 'r', newline='', encoding="utf-8")
+dst = open("../data/news/2news_keystatement.csv", 'w', newline='', encoding="utf-8")
+dst2 = open("../data/news/2news_excepted.csv", 'w', newline='', encoding="utf-8")
 
 src_reader = csv.reader(src, delimiter=",", quotechar="|")
 dst_writer = csv.writer(dst, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)

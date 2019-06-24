@@ -1,6 +1,7 @@
 # @author       umbum (umbum7601@gmail.com)
 # @date         2019/06/09
-#
+# BERT로 생성된 바이너리 뉴스 데이터에 주가를 labeling해주는 스크립트
+
 import os
 import csv
 

@@ -1,3 +1,7 @@
+# @author       umbum (umbum7601@gmail.com)
+# @date         2019/05/03
+# ./5news_IE.csv의 주어, 목적어, 서술어를 각각 벡터로 임베딩한 결과인 ../data/6news_vectors.pickle를 생성하는 스크립트
+
 import os
 import csv
 from gensim.models import Word2Vec
@@ -18,9 +22,9 @@ model = api.load(model_name)
 print(model.most_similar("samsung"))
 print(model.most_similar("unveil"))
 
-src = open("./5news_IE.csv", 'r', newline='', encoding="utf-8")
+src = open("../data/news/5news_IE.csv", 'r', newline='', encoding="utf-8")
 src_reader = csv.reader(src, delimiter=",", quotechar="|")
-dst = open("../data/6news_vectors.pickle", "wb")
+dst = open("../data/news/6news_vectors.pickle", "wb")
 
 def getWordVector(word : str):
     word_list = word.split()

@@ -1,3 +1,7 @@
+# @author       umbum (umbum7601@gmail.com)
+# @date         2019/04/22
+# ./4news_translated{시작일}-{종료일}.csv의 뉴스 문장을 주어, 목적어, 서술어로 자른 결과인 ./5news_IE.csv를 생성하는 스크립트
+
 """
 openIE는 로딩하는데 오래걸리니까... 계속 띄워놓을 수 있도록 subprocess로 실행해서 파이프로 연결한 다음에 입출력한다.
 
@@ -20,8 +24,8 @@ from pprint import pprint
 import csv
 
 
-src = open("./4news_translated2019.04.09-2018.01.01_sorted.csv", 'r', newline='', encoding="utf-8",)
-dst = open("./5news_IE.csv", 'w', newline='', encoding="utf-8") 
+src = open("../data/news/4news_translated_sorted.csv", 'r', newline='', encoding="utf-8",)
+dst = open("../data/news/5news_IE.csv", 'w', newline='', encoding="utf-8") 
 
 src_reader = csv.reader(src, delimiter=",", quotechar="|")
 dst_writer = csv.writer(dst, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL)
